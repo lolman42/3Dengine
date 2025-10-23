@@ -1,24 +1,28 @@
 import pygame
-import math
+from readobj import readobj, readfaces, readvertex
+
+pygame.init()
 
 fov = 500
-
-(width, height) = (800, 600)
-screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption('3d game')
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('3D GAME')
 
 class object3d:
-    def __init__(self, vertices, faces):
+    def __init__(self, vertices, faces, speed):
         self.vertices = vertices
         self.faces = faces
+        self.speed = speed
 
-    def projection(self, vertices):
-        z = fov + vertices[2]
+    def projection(self, vertex):
+        z = fov + vertex[2]
         if z < 0.1:
             z = 0.1
-        projectedX = vertices[0] * fov / z
-        projectedY = vertices[1] * fov / z
-        return(projectedX,projectedY)
+        projectedX = vertex[0] * fov / z
+        projectedY = vertex[1] * fov / z
+        screenX = int(projectedX + WIDTH / 2)
+        screenY = int(-projectedY + HEIGHT / 2)
+        return screenX, screenY
     
     def move(self, x, y, z):
         for vertex in self.vertices:
@@ -27,56 +31,48 @@ class object3d:
             vertex[2] += z
 
     def draw(self, screen):
+        keystate = pygame.key.get_pressed()
+        if keystate[pygame.K_a]:
+            self.move(-self.speed, 0, 0)
+        if keystate[pygame.K_d]:
+            self.move(self.speed, 0, 0)
+        if keystate[pygame.K_w]:
+            self.move(0, self.speed, 0)
+        if keystate[pygame.K_s]:
+            self.move(0, -self.speed, 0)
+        if keystate[pygame.K_q]:
+            self.move(0, 0, -self.speed)
+        if keystate[pygame.K_e]:
+            self.move(0, 0, self.speed)
         for face in self.faces:
             for i in range(len(face)):
-                start = self.projection(self.vertices[face[i]])
-                end = self.projection(self.vertices[face[(i + 1) % len(face)]])
-                pygame.draw.line(screen, (255, 255, 255), start, end, 1)
+                try:
+                    start = self.projection(self.vertices[face[i]])
+                    end = self.projection(self.vertices[face[(i + 1) % len(face)]])
+                    pygame.draw.line(screen, (255, 255, 255), start, end, 1)
+                except Exception:
+                    continue
 
-cube = object3d(
-    vertices=[
-        [-100, -100, -100],
-        [ 100, -100, -100],
-        [ 100,  100, -100],
-        [-100,  100, -100],
-        [-100, -100,  100],
-        [ 100, -100,  100],
-        [ 100,  100,  100],
-        [-100,  100,  100]
-    ],
-    faces=[
-        [0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [0, 4, 7, 3],
-        [0, 4, 5, 1],
-        [1, 5, 6, 2],
-        [2, 6, 7, 3]
-    ]
-)
+football_v, football_f = readobj("football.obj")
+football_v = readvertex(football_v)
+football_f = readfaces(football_f)
+football = object3d(football_v, football_f, 1)
+football.move(0,0,2500)
+
+monkey_v, monkey_f = readobj("monkey.obj")
+monkey_v = readvertex(monkey_v)
+monkey_f = readfaces(monkey_f)
+monkey = object3d(monkey_v, monkey_f, 0.01)
+monkey.move(0,0,-500)
 
 running = True
-speed = 1
+clock = pygame.time.Clock()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    keystate = pygame.key.get_pressed()
-    if keystate[pygame.K_ESCAPE]:
-        running = False
-    if keystate[pygame.K_a]:
-        cube.move(-speed, 0, 0)
-    if keystate[pygame.K_d]:  
-        cube.move(speed, 0, 0)
-    if keystate[pygame.K_w]:
-        cube.move(0, -speed, 0)
-    if keystate[pygame.K_s]:
-        cube.move(0, speed, 0)
-    if keystate[pygame.K_q]:
-        cube.move(0, 0, -speed)
-    if keystate[pygame.K_e]:
-        cube.move(0, 0, speed)
-    
-    screen.fill((0,0,0))
-    cube.draw(screen)
+    screen.fill((0, 0, 0))
+    football.draw(screen)
+    monkey.draw(screen)
     pygame.display.flip()
+pygame.quit()
