@@ -47,10 +47,13 @@ class object3d:
         for face in self.faces:
             for i in range(len(face)):
                 try:
-                    start = self.projection(self.vertices[face[i]])
-                    end = self.projection(self.vertices[face[(i + 1) % len(face)]])
+                    # obj indices start at 1, so subtract 1
+                    v1 = self.vertices[int(face[i]) - 1]
+                    v2 = self.vertices[int(face[(i + 1) % len(face)]) - 1]
+                    start = self.projection(v1)
+                    end = self.projection(v2)
                     pygame.draw.line(screen, (255, 255, 255), start, end, 1)
-                except Exception:
+                except:
                     continue
 
 football_v, football_f = readobj("football.obj")
@@ -72,7 +75,6 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     screen.fill((0, 0, 0))
-    football.draw(screen)
     monkey.draw(screen)
     pygame.display.flip()
 pygame.quit()
