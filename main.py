@@ -103,6 +103,16 @@ class object3d:
             self.move(-ox, -oy, -oz)
             self.rotateX(-0.01)
             self.move(ox, oy, oz)
+        if keystate[pygame.K_SLASH]:
+            ox, oy, oz = self.getModelOrigin()
+            self.move(-ox, -oy, -oz)
+            self.rotateZ(-0.01)
+            self.move(ox, oy, oz)
+        if keystate[pygame.K_RSHIFT]:
+            ox, oy, oz = self.getModelOrigin()
+            self.move(-ox, -oy, -oz)
+            self.rotateZ(0.01)
+            self.move(ox, oy, oz)
         for face in self.faces:
             for i in range(len(face)):
                 try:
@@ -116,7 +126,7 @@ class object3d:
                     continue
 
 football_v, football_f = readobj("football.obj")
-football = object3d(football_v, football_f, 1)
+football = object3d(football_v, football_f, 5)
 football.move(0,0,2500)
 
 monkey_v, monkey_f = readobj('monkey.obj')
@@ -130,6 +140,6 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     screen.fill((255,255,255))
-    monkey.draw(screen, (0,0,0))
+    football.draw(screen, (0,0,0))
     pygame.display.flip()
 pygame.quit()
