@@ -1,23 +1,10 @@
-def readobj(path):
-    v, f = [], []
-    with open(path, 'r') as file:
-        data = file.readlines()
-        for line in data:
+import math
 
-            """
-            if line.startswith('vn '):
-                vn.append(line)
-            elif line.startswith('vt '):
-                vt.append(line)
-            """
-
-            if line.startswith('v '):
-                v.append(line)
-            elif line.startswith('f '):
-                f.append(line)
-    return v, f
-
-monkey_v, monkey_f = readobj("monkey.obj")
+class point3d:
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
 
 def readfaces(faces):
     clean_faces = []
@@ -39,10 +26,28 @@ def readvertex(vertexes):
     for vertex in vertexes:
         vertex = vertex[1:-1] # remove f and \n
         clean_vertexes.append(vertex.split())
+    
     usable_vertexes = []
     for vertex in clean_vertexes:
-        points = []
-        for point in vertex:
-            points.append(float(point))
-        usable_vertexes.append(points)
+        point = point3d(float(vertex[0]), float(vertex[1]), float(vertex[2]))
+        usable_vertexes.append(point)
     return usable_vertexes
+
+def readobj(path):
+    v, f = [], []
+    with open(path, 'r') as file:
+        data = file.readlines()
+        for line in data:
+
+            """
+            if line.startswith('vn '):
+                vn.append(line)
+            elif line.startswith('vt '):
+                vt.append(line)
+            """
+
+            if line.startswith('v '):
+                v.append(line)
+            elif line.startswith('f '):
+                f.append(line)
+    return readvertex(v), readfaces(f)
